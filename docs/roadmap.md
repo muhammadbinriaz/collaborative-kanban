@@ -2,7 +2,7 @@
 
 The full product vision stays here. Implementation is phased. Do not treat unchecked items as missing from a broken v1 — they are scheduled.
 
-## Phase 1 — Core Kanban (current)
+## Phase 1 — Core Kanban
 
 - [x] Docker Compose: Postgres 16 + pgvector, Redis, MinIO, pgAdmin, backend, frontend
 - [x] FastAPI skeleton, settings, CORS, structured logging
@@ -13,14 +13,14 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] Next.js app: login/register, workspace list, board view
 - [x] Seed script for a demo workspace
 
-## Phase 2 — Collaboration
+## Phase 2 — Collaboration (current)
 
-- [ ] Roles enforced across every mutation (owner / admin / member / viewer)
-- [ ] Invites (share link first; email later)
-- [ ] Comments + @mentions
-- [ ] Activity / audit log
-- [ ] FastAPI WebSockets: board sync (`/ws/boards/{id}`) + presence (`/ws/presence`)
-- [ ] In-app notifications
+- [x] Roles enforced across every mutation (owner / admin / member / viewer)
+- [x] Invites (share link first; email later)
+- [x] Comments + @mentions
+- [x] Activity / audit log
+- [x] FastAPI WebSockets: board sync (`/ws/boards/{id}`) + presence (`/ws/presence`)
+- [x] In-app notifications
 
 ## Phase 3 — Sprints and analytics
 

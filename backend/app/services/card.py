@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.board import Board
 from app.models.card import Card, Label
 from app.models.list import BoardList
 from app.models.user import User
@@ -12,6 +13,7 @@ from app.schemas.auth import UserPublic
 from app.schemas.board import LabelPublic
 from app.schemas.card import CardCreate, CardMove, CardPublic, CardUpdate
 from app.schemas.list import ListCreate, ListPublic, ListUpdate
+from app.services.activity import log_activity, publish_board_event
 from app.services.board import require_board
 from app.services.position import next_position
 
@@ -33,8 +35,6 @@ def _card_to_public(card: Card) -> CardPublic:
 
 
 def _load_card(db: Session, card_id: UUID) -> Card | None:
-    from sqlalchemy import select
-
     return db.scalar(
         select(Card)
         .options(selectinload(Card.assignee), selectinload(Card.labels), selectinload(Card.board_list))
@@ -55,17 +55,27 @@ def require_list(
     return board_list
 
 
-def create_list(db: Session, user: User, board_id: UUID, payload: ListCreate) -> ListPublic:
-    require_board(db, board_id, user, WorkspaceRole.MEMBER)
+async def create_list(db: Session, user: User, board_id: UUID, payload: ListCreate) -> ListPublic:
+    board = require_board(db, board_id, user, WorkspaceRole.MEMBER)
     board_list = BoardList(
         board_id=board_id,
         name=payload.name.strip(),
         position=payload.position if payload.position is not None else next_position(db, BoardList, "board_id", board_id),
     )
     db.add(board_list)
+    log_activity(
+        db,
+        workspace_id=board.workspace_id,
+        board_id=board.id,
+        actor=user,
+        action="list.created",
+        summary=f'{user.name} created list "{board_list.name}"',
+    )
     db.commit()
     db.refresh(board_list)
-    return ListPublic.model_validate(board_list)
+    public = ListPublic.model_validate(board_list)
+    await publish_board_event(board.id, "list.created", public.model_dump(mode="json"))
+    return public
 
 
 def update_list(db: Session, user: User, list_id: UUID, payload: ListUpdate) -> ListPublic:
@@ -95,8 +105,9 @@ def _apply_labels(db: Session, card: Card, board_id: UUID, label_ids: list[UUID]
     card.labels = labels
 
 
-def create_card(db: Session, user: User, list_id: UUID, payload: CardCreate) -> CardPublic:
+async def create_card(db: Session, user: User, list_id: UUID, payload: CardCreate) -> CardPublic:
     board_list = require_list(db, list_id, user, WorkspaceRole.MEMBER)
+    board = db.get(Board, board_list.board_id)
     card = Card(
         list_id=list_id,
         title=payload.title.strip(),
@@ -109,8 +120,19 @@ def create_card(db: Session, user: User, list_id: UUID, payload: CardCreate) -> 
     db.flush()
     if payload.label_ids:
         _apply_labels(db, card, board_list.board_id, payload.label_ids)
+    log_activity(
+        db,
+        workspace_id=board.workspace_id,
+        board_id=board.id,
+        card_id=card.id,
+        actor=user,
+        action="card.created",
+        summary=f'{user.name} created "{card.title}"',
+    )
     db.commit()
-    return _card_to_public(_load_card(db, card.id))
+    public = _card_to_public(_load_card(db, card.id))
+    await publish_board_event(board.id, "card.created", public.model_dump(mode="json"))
+    return public
 
 
 def get_card(db: Session, user: User, card_id: UUID) -> CardPublic:
@@ -121,11 +143,11 @@ def get_card(db: Session, user: User, card_id: UUID) -> CardPublic:
     return _card_to_public(card)
 
 
-def update_card(db: Session, user: User, card_id: UUID, payload: CardUpdate) -> CardPublic:
+async def update_card(db: Session, user: User, card_id: UUID, payload: CardUpdate) -> CardPublic:
     card = _load_card(db, card_id)
     if card is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-    require_board(db, card.board_list.board_id, user, WorkspaceRole.MEMBER)
+    board = require_board(db, card.board_list.board_id, user, WorkspaceRole.MEMBER)
     data = payload.model_dump(exclude_unset=True)
     if "title" in data and data["title"] is not None:
         card.title = data["title"].strip()
@@ -137,34 +159,69 @@ def update_card(db: Session, user: User, card_id: UUID, payload: CardUpdate) -> 
         card.assignee_id = data["assignee_id"]
     if "label_ids" in data and data["label_ids"] is not None:
         _apply_labels(db, card, card.board_list.board_id, data["label_ids"])
+    log_activity(
+        db,
+        workspace_id=board.workspace_id,
+        board_id=board.id,
+        card_id=card.id,
+        actor=user,
+        action="card.updated",
+        summary=f'{user.name} updated "{card.title}"',
+    )
     db.commit()
-    return _card_to_public(_load_card(db, card.id))
+    public = _card_to_public(_load_card(db, card.id))
+    await publish_board_event(board.id, "card.updated", public.model_dump(mode="json"))
+    return public
 
 
-def delete_card(db: Session, user: User, card_id: UUID) -> None:
-    card = db.get(Card, card_id)
-    if card is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-    board_list = db.get(BoardList, card.list_id)
-    require_board(db, board_list.board_id, user, WorkspaceRole.MEMBER)
-    db.delete(card)
-    db.commit()
-
-
-def move_card(db: Session, user: User, card_id: UUID, payload: CardMove) -> CardPublic:
+async def delete_card(db: Session, user: User, card_id: UUID) -> None:
     card = _load_card(db, card_id)
     if card is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-    source_board_id = card.board_list.board_id
-    require_board(db, source_board_id, user, WorkspaceRole.MEMBER)
+    board = require_board(db, card.board_list.board_id, user, WorkspaceRole.MEMBER)
+    title = card.title
+    list_id = card.list_id
+    log_activity(
+        db,
+        workspace_id=board.workspace_id,
+        board_id=board.id,
+        card_id=card.id,
+        actor=user,
+        action="card.deleted",
+        summary=f'{user.name} deleted "{title}"',
+    )
+    db.delete(card)
+    db.commit()
+    await publish_board_event(
+        board.id, "card.deleted", {"id": str(card_id), "list_id": str(list_id)}
+    )
+
+
+async def move_card(db: Session, user: User, card_id: UUID, payload: CardMove) -> CardPublic:
+    card = _load_card(db, card_id)
+    if card is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+    board = require_board(db, card.board_list.board_id, user, WorkspaceRole.MEMBER)
 
     target_list = db.get(BoardList, payload.list_id)
     if target_list is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Target list not found")
-    if target_list.board_id != source_board_id:
+    if target_list.board_id != board.id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot move card to another board")
 
     card.list_id = payload.list_id
     card.position = payload.position
+    log_activity(
+        db,
+        workspace_id=board.workspace_id,
+        board_id=board.id,
+        card_id=card.id,
+        actor=user,
+        action="card.moved",
+        summary=f'{user.name} moved "{card.title}"',
+        meta={"list_id": str(payload.list_id), "position": payload.position},
+    )
     db.commit()
-    return _card_to_public(_load_card(db, card.id))
+    public = _card_to_public(_load_card(db, card.id))
+    await publish_board_event(board.id, "card.moved", public.model_dump(mode="json"))
+    return public

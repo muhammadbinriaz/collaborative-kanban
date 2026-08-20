@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import { CardComments } from "@/components/kanban/card-comments";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -50,8 +51,8 @@ export function CardModal({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["board", board.id] });
+      queryClient.invalidateQueries({ queryKey: ["activity", board.id] });
       toast.success("Card updated");
-      onOpenChange(false);
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -60,6 +61,7 @@ export function CardModal({
     mutationFn: () => api<void>(`/api/v1/cards/${card?.id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["board", board.id] });
+      queryClient.invalidateQueries({ queryKey: ["activity", board.id] });
       onOpenChange(false);
     },
     onError: (error: Error) => toast.error(error.message),
@@ -69,9 +71,9 @@ export function CardModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit card</DialogTitle>
+          <DialogTitle>Card details</DialogTitle>
         </DialogHeader>
         <form
           className="space-y-4"
@@ -90,7 +92,7 @@ export function CardModal({
               id="card-description"
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              rows={5}
+              rows={4}
             />
           </div>
           <div className="space-y-2">
@@ -129,6 +131,7 @@ export function CardModal({
             </Button>
           </div>
         </form>
+        <CardComments cardId={card.id} />
       </DialogContent>
     </Dialog>
   );

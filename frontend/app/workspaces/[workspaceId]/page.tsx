@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/app-header";
+import { InvitePanel } from "@/components/invite-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -68,13 +69,15 @@ export default function WorkspacePage() {
             <p className="text-sm uppercase tracking-wide text-muted-foreground">Boards</p>
             <h2 className="font-serif text-3xl">{workspace.data?.name}</h2>
           </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4" />
-                New board
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            {workspace.data ? <InvitePanel workspace={workspace.data} /> : null}
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4" />
+                  New board
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create board</DialogTitle>
@@ -100,6 +103,7 @@ export default function WorkspacePage() {
               </form>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {boards.data?.map((board) => (

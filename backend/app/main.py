@@ -5,12 +5,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.websocket.routes import router as ws_router
 
 setup_logging()
 
 app = FastAPI(
     title="AI Kanban API",
-    version="0.1.0",
+    version="0.2.0",
     description="Custom FastAPI backend for the AI-powered collaborative Kanban app.",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(ws_router)
 
 
 @app.get("/health")

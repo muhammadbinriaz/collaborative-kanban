@@ -31,10 +31,10 @@ def delete_board(board_id: UUID, db: DbSession, current_user: CurrentUser) -> Re
 
 
 @router.post("/{board_id}/lists", response_model=ListPublic, status_code=201)
-def create_list(
+async def create_list(
     board_id: UUID, payload: ListCreate, db: DbSession, current_user: CurrentUser
 ) -> ListPublic:
-    return card_service.create_list(db, current_user, board_id, payload)
+    return await card_service.create_list(db, current_user, board_id, payload)
 
 
 @router.post("/{board_id}/labels", response_model=LabelPublic, status_code=201)

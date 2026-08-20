@@ -4,9 +4,9 @@ from fastapi import APIRouter, Response, status
 
 from app.api.deps import CurrentUser, DbSession
 from app.schemas.card import CardPublic
+from app.schemas.card import CardCreate
 from app.schemas.list import ListPublic, ListUpdate
 from app.services import card as card_service
-from app.schemas.card import CardCreate
 
 router = APIRouter(tags=["lists"])
 
@@ -25,7 +25,7 @@ def delete_list(list_id: UUID, db: DbSession, current_user: CurrentUser) -> Resp
 
 
 @router.post("/lists/{list_id}/cards", response_model=CardPublic, status_code=201)
-def create_card(
+async def create_card(
     list_id: UUID, payload: CardCreate, db: DbSession, current_user: CurrentUser
 ) -> CardPublic:
-    return card_service.create_card(db, current_user, list_id, payload)
+    return await card_service.create_card(db, current_user, list_id, payload)
