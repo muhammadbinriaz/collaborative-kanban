@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Kanban Postgres",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "kanban",
+      "Username": "kanban",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

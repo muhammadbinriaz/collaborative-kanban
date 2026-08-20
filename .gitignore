@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+
+# Env
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker / local data (named volumes preferred)
+docker/data/
+
+# Python
+.python-version
+
+# Test
+coverage/
+.nyc_output/
+
+# Misc
+*.tsbuildinfo
+next-env.d.ts
+!frontend/next-env.d.ts

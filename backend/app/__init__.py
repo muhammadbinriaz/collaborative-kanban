@@ -1,0 +1,1 @@
+"""AI Kanban backend application."""
