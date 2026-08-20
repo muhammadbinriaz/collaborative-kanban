@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -17,12 +17,27 @@ import { api } from "@/lib/api";
 import { newCardPosition } from "@/lib/utils";
 import type { BoardDetail, BoardList, Card } from "@/types";
 
-export function BoardView({ board }: { board: BoardDetail }) {
+export function BoardView({
+  board,
+  onCardSelect,
+}: {
+  board: BoardDetail;
+  onCardSelect?: (cardId: string | null) => void;
+}) {
   const queryClient = useQueryClient();
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [listName, setListName] = useState("");
+  // hello-pangea/dnd needs a client-only mount; SSR/hydration otherwise breaks dragging.
+  const [dndReady, setDndReady] = useState(false);
+  useEffect(() => {
+    setDndReady(true);
+  }, []);
   const lists = useMemo(() => [...board.lists].sort((a, b) => a.position - b.position), [board.lists]);
 
+  function openCard(card: Card) {
+    setSelectedCard(card);
+    onCardSelect?.(card.id);
+  }
   function setBoard(next: BoardDetail) {
     queryClient.setQueryData(["board", board.id], next);
   }
@@ -111,30 +126,34 @@ export function BoardView({ board }: { board: BoardDetail }) {
         <PresenceAvatars users={presence} connected={connected} />
       </div>
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="board-scroll flex flex-1 items-start gap-4 overflow-x-auto p-4">
-            {lists.map((list) => (
-              <ListColumn key={list.id} boardId={board.id} list={list} onOpenCard={setSelectedCard} />
-            ))}
-            <form
-              className="w-72 shrink-0 rounded-xl border bg-card/70 p-3"
-              onSubmit={(event) => {
-                event.preventDefault();
-                if (listName.trim()) createList.mutate();
-              }}
-            >
-              <Input
-                placeholder="Add another list"
-                value={listName}
-                onChange={(event) => setListName(event.target.value)}
-              />
-              <Button className="mt-2 w-full" type="submit" variant="secondary" disabled={createList.isPending}>
-                <Plus className="h-4 w-4" />
-                Add list
-              </Button>
-            </form>
-          </div>
-        </DragDropContext>
+        {dndReady ? (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <div className="board-scroll flex flex-1 items-start gap-4 overflow-x-auto p-4">
+              {lists.map((list) => (
+                <ListColumn key={list.id} boardId={board.id} list={list} onOpenCard={openCard} />
+              ))}
+              <form
+                className="w-72 shrink-0 rounded-xl border bg-card/70 p-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (listName.trim()) createList.mutate();
+                }}
+              >
+                <Input
+                  placeholder="Add another list"
+                  value={listName}
+                  onChange={(event) => setListName(event.target.value)}
+                />
+                <Button className="mt-2 w-full" type="submit" variant="secondary" disabled={createList.isPending}>
+                  <Plus className="h-4 w-4" />
+                  Add list
+                </Button>
+              </form>
+            </div>
+          </DragDropContext>
+        ) : (
+          <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">Loading board…</div>
+        )}
         <ActivityFeed boardId={board.id} />
       </div>
       <CardModal
@@ -142,7 +161,10 @@ export function BoardView({ board }: { board: BoardDetail }) {
         board={board}
         open={Boolean(selectedCard)}
         onOpenChange={(open) => {
-          if (!open) setSelectedCard(null);
+          if (!open) {
+            setSelectedCard(null);
+            onCardSelect?.(null);
+          }
         }}
       />
     </div>

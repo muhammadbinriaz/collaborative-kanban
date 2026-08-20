@@ -53,9 +53,20 @@ export function ListColumn({
           >
             {cards.map((card, index) => (
               <Draggable key={card.id} draggableId={card.id} index={index}>
-                {(drag) => (
-                  <div ref={drag.innerRef} {...drag.draggableProps} {...drag.dragHandleProps}>
-                    <CardItem card={card} onClick={() => onOpenCard(card)} />
+                {(drag, dragSnapshot) => (
+                  <div
+                    ref={drag.innerRef}
+                    {...drag.draggableProps}
+                    {...drag.dragHandleProps}
+                    style={drag.draggableProps.style}
+                  >
+                    <CardItem
+                      card={card}
+                      isDragging={dragSnapshot.isDragging}
+                      onClick={() => {
+                        if (!dragSnapshot.isDragging) onOpenCard(card);
+                      }}
+                    />
                   </div>
                 )}
               </Draggable>

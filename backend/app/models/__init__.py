@@ -1,3 +1,4 @@
+from app.models.ai import AiJob, CardEmbedding
 from app.models.board import Board
 from app.models.card import Card, Label, card_labels
 from app.models.collaboration import Activity, Comment, CommentMention, Notification, WorkspaceInvite
@@ -9,9 +10,11 @@ from app.models.workspace import ROLE_RANK, Workspace, WorkspaceMember, Workspac
 
 __all__ = [
     "Activity",
+    "AiJob",
     "Board",
     "BoardList",
     "Card",
+    "CardEmbedding",
     "Comment",
     "CommentMention",
     "Label",

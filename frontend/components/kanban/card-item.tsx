@@ -2,17 +2,38 @@
 
 import { Calendar } from "lucide-react";
 
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import type { Card } from "@/types";
 
-export function CardItem({ card, onClick }: { card: Card; onClick: () => void }) {
+export function CardItem({
+  card,
+  onClick,
+  className,
+  isDragging,
+}: {
+  card: Card;
+  onClick: () => void;
+  className?: string;
+  isDragging?: boolean;
+}) {
   const due = formatDate(card.due_date);
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="w-full rounded-lg border bg-card p-3 text-left shadow-sm transition hover:border-primary/40 hover:shadow"
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      className={cn(
+        "w-full cursor-grab rounded-lg border bg-card p-3 text-left shadow-sm transition hover:border-primary/40 hover:shadow active:cursor-grabbing",
+        isDragging && "shadow-md ring-2 ring-primary/30",
+        className,
+      )}
     >
       {card.labels.length > 0 ? (
         <div className="mb-2 flex flex-wrap gap-1">
@@ -39,6 +60,6 @@ export function CardItem({ card, onClick }: { card: Card; onClick: () => void })
         </span>
         {card.assignee ? <span>{card.assignee.name.split(" ")[0]}</span> : null}
       </div>
-    </button>
+    </div>
   );
 }

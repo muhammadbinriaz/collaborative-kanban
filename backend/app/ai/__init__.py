@@ -1,1 +1,3 @@
-"""Placeholder for Groq / embedding services (Phase 4)."""
+from app.ai import embeddings, groq_client, prompts
+
+__all__ = ["embeddings", "groq_client", "prompts"]

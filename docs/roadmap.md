@@ -22,7 +22,7 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] FastAPI WebSockets: board sync (`/ws/boards/{id}`) + presence (`/ws/presence`)
 - [x] In-app notifications
 
-## Phase 3 — Sprints and analytics (current)
+## Phase 3 — Sprints and analytics
 
 - [x] Sprint lifecycle (plan, start, complete)
 - [x] Card estimates + assignment UX
@@ -31,14 +31,14 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 
 ## Phase 4 — AI project manager
 
-- [ ] Groq client + prompt templates (`GROQ_MODEL=llama-3.3-70b-versatile`)
-- [ ] Prioritization, standup summary, risk detection, workload balance, sprint plan
-- [ ] Embeddings + similar/duplicate task search (pgvector)
-- [ ] Predictive dates from historical cycle time
-- [ ] Celery jobs for slow AI work
-- [ ] AI UI panels on the board (`frontend/components/ai`)
+- [x] Groq client + prompt templates (`GROQ_MODEL=openai/gpt-oss-120b`)
+- [x] Prioritization, standup summary, risk detection, workload balance, sprint plan
+- [x] Embeddings + similar/duplicate task search (pgvector)
+- [x] Predictive dates from historical cycle time
+- [x] Celery jobs for slow AI work
+- [x] AI UI panels on the board (`frontend/components/ai`)
 
-## Phase 5 — Integrations and production
+## Phase 5 — Integrations and production (next)
 
 - [ ] Card attachments (MinIO in dev / S3 in prod)
 - [ ] GitHub OAuth, repo connect, PR/commit webhooks
