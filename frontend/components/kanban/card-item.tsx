@@ -28,14 +28,15 @@ export function CardItem({ card, onClick }: { card: Card; onClick: () => void })
       ) : null}
       <p className="text-sm font-medium leading-snug">{card.title}</p>
       <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-        {due ? (
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
-            {due}
-          </span>
-        ) : (
-          <span />
-        )}
+        <span className="inline-flex items-center gap-2">
+          {due ? (
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              {due}
+            </span>
+          ) : null}
+          {card.estimate_points != null ? <span>{card.estimate_points} pts</span> : null}
+        </span>
         {card.assignee ? <span>{card.assignee.name.split(" ")[0]}</span> : null}
       </div>
     </button>

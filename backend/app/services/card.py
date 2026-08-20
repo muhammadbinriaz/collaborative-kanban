@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -18,6 +19,11 @@ from app.services.board import require_board
 from app.services.position import next_position
 
 
+def _is_done_list(name: str) -> bool:
+    lowered = name.lower()
+    return any(token in lowered for token in ("done", "complete", "closed", "finished"))
+
+
 def _card_to_public(card: Card) -> CardPublic:
     return CardPublic(
         id=card.id,
@@ -27,6 +33,9 @@ def _card_to_public(card: Card) -> CardPublic:
         position=card.position,
         due_date=card.due_date,
         assignee_id=card.assignee_id,
+        estimate_points=card.estimate_points,
+        sprint_id=card.sprint_id,
+        completed_at=card.completed_at,
         assignee=UserPublic.model_validate(card.assignee) if card.assignee else None,
         labels=[LabelPublic.model_validate(label) for label in card.labels],
         created_at=card.created_at,
@@ -114,6 +123,8 @@ async def create_card(db: Session, user: User, list_id: UUID, payload: CardCreat
         description=payload.description,
         due_date=payload.due_date,
         assignee_id=payload.assignee_id,
+        estimate_points=payload.estimate_points,
+        sprint_id=payload.sprint_id,
         position=payload.position if payload.position is not None else next_position(db, Card, "list_id", list_id),
     )
     db.add(card)
@@ -157,6 +168,10 @@ async def update_card(db: Session, user: User, card_id: UUID, payload: CardUpdat
         card.due_date = data["due_date"]
     if "assignee_id" in data:
         card.assignee_id = data["assignee_id"]
+    if "estimate_points" in data:
+        card.estimate_points = data["estimate_points"]
+    if "sprint_id" in data:
+        card.sprint_id = data["sprint_id"]
     if "label_ids" in data and data["label_ids"] is not None:
         _apply_labels(db, card, card.board_list.board_id, data["label_ids"])
     log_activity(
@@ -211,6 +226,10 @@ async def move_card(db: Session, user: User, card_id: UUID, payload: CardMove) -
 
     card.list_id = payload.list_id
     card.position = payload.position
+    if _is_done_list(target_list.name):
+        card.completed_at = card.completed_at or datetime.now(UTC)
+    else:
+        card.completed_at = None
     log_activity(
         db,
         workspace_id=board.workspace_id,

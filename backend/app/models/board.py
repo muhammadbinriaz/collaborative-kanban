@@ -36,3 +36,6 @@ class Board(Base):
     labels: Mapped[list["Label"]] = relationship(
         "Label", back_populates="board", cascade="all, delete-orphan"
     )
+    sprints: Mapped[list["Sprint"]] = relationship(
+        "Sprint", back_populates="board", cascade="all, delete-orphan"
+    )

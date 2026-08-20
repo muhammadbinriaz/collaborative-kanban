@@ -79,6 +79,8 @@ def create_board(db: Session, user: User, workspace_id: UUID, payload: BoardCrea
 
 
 def get_board(db: Session, user: User, board_id: UUID) -> BoardDetail:
+    from app.services.card import _card_to_public
+
     require_board(db, board_id, user)
     board = _load_board(db, board_id)
     if board is None:
@@ -86,19 +88,7 @@ def get_board(db: Session, user: User, board_id: UUID) -> BoardDetail:
     lists = []
     for board_list in sorted(board.lists, key=lambda item: item.position):
         cards = [
-            CardPublic(
-                id=card.id,
-                list_id=card.list_id,
-                title=card.title,
-                description=card.description,
-                position=card.position,
-                due_date=card.due_date,
-                assignee_id=card.assignee_id,
-                assignee=UserPublic.model_validate(card.assignee) if card.assignee else None,
-                labels=[LabelPublic.model_validate(label) for label in card.labels],
-                created_at=card.created_at,
-                updated_at=card.updated_at,
-            )
+            _card_to_public(card)
             for card in sorted(board_list.cards, key=lambda item: item.position)
         ]
         lists.append(

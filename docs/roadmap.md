@@ -13,7 +13,7 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] Next.js app: login/register, workspace list, board view
 - [x] Seed script for a demo workspace
 
-## Phase 2 — Collaboration (current)
+## Phase 2 — Collaboration
 
 - [x] Roles enforced across every mutation (owner / admin / member / viewer)
 - [x] Invites (share link first; email later)
@@ -22,12 +22,12 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] FastAPI WebSockets: board sync (`/ws/boards/{id}`) + presence (`/ws/presence`)
 - [x] In-app notifications
 
-## Phase 3 — Sprints and analytics
+## Phase 3 — Sprints and analytics (current)
 
-- [ ] Sprint lifecycle (plan, start, complete)
-- [ ] Card estimates + assignment UX
-- [ ] Burndown, velocity, workload charts (Recharts)
-- [ ] Stale-task / bottleneck queries (rules first, AI later)
+- [x] Sprint lifecycle (plan, start, complete)
+- [x] Card estimates + assignment UX
+- [x] Burndown, velocity, workload charts (Recharts)
+- [x] Stale-task / bottleneck queries (rules first, AI later)
 
 ## Phase 4 — AI project manager
 

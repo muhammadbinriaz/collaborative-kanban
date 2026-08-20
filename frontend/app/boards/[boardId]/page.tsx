@@ -1,18 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { AnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { AppHeader } from "@/components/app-header";
 import { BoardView } from "@/components/kanban/board-view";
+import { SprintPanel } from "@/components/kanban/sprint-panel";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/lib/api";
 import type { BoardDetail } from "@/types";
+
+type Tab = "board" | "sprints" | "analytics";
 
 export default function BoardPage() {
   const { user, ready } = useAuth({ requireAuth: true });
   const params = useParams<{ boardId: string }>();
   const boardId = params.boardId;
+  const [tab, setTab] = useState<Tab>("board");
 
   const board = useQuery({
     queryKey: ["board", boardId],
@@ -35,7 +42,35 @@ export default function BoardPage() {
         backHref={`/workspaces/${board.data.workspace_id}`}
         backLabel="Boards"
       />
-      <BoardView board={board.data} />
+      <div className="flex items-center gap-2 border-b px-4 py-2">
+        {(
+          [
+            ["board", "Board"],
+            ["sprints", "Sprints"],
+            ["analytics", "Analytics"],
+          ] as const
+        ).map(([key, label]) => (
+          <Button
+            key={key}
+            size="sm"
+            variant={tab === key ? "default" : "ghost"}
+            onClick={() => setTab(key)}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+      {tab === "board" ? <BoardView board={board.data} /> : null}
+      {tab === "sprints" ? (
+        <div className="mx-auto w-full max-w-3xl flex-1 overflow-y-auto">
+          <SprintPanel board={board.data} />
+        </div>
+      ) : null}
+      {tab === "analytics" ? (
+        <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto">
+          <AnalyticsPanel boardId={board.data.id} />
+        </div>
+      ) : null}
     </div>
   );
 }

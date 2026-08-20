@@ -60,6 +60,9 @@ export type Card = {
   position: number;
   due_date: string | null;
   assignee_id: string | null;
+  estimate_points: number | null;
+  sprint_id: string | null;
+  completed_at: string | null;
   assignee: User | null;
   labels: Label[];
   created_at: string;
@@ -137,4 +140,43 @@ export type PresenceUser = {
   id: string;
   name: string;
   email: string;
+};
+
+export type Sprint = {
+  id: string;
+  board_id: string;
+  name: string;
+  goal: string | null;
+  status: "planned" | "active" | "completed" | string;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
+  total_points: number;
+  completed_points: number;
+  card_count: number;
+};
+
+export type BoardAnalytics = {
+  burndown: { date: string; ideal_remaining: number; actual_remaining: number | null }[];
+  velocity: {
+    sprint_id: string;
+    sprint_name: string;
+    completed_points: number;
+    committed_points: number;
+  }[];
+  workload: {
+    user_id: string | null;
+    user_name: string;
+    card_count: number;
+    estimate_points: number;
+  }[];
+  bottlenecks: {
+    type: string;
+    title: string;
+    detail: string;
+    severity: string;
+    meta?: Record<string, unknown> | null;
+  }[];
+  active_sprint: Sprint | null;
 };

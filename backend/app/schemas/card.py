@@ -12,6 +12,8 @@ class CardCreate(BaseModel):
     description: str | None = None
     due_date: datetime | None = None
     assignee_id: UUID | None = None
+    estimate_points: float | None = Field(default=None, ge=0, le=100)
+    sprint_id: UUID | None = None
     position: float | None = None
     label_ids: list[UUID] = []
 
@@ -21,6 +23,8 @@ class CardUpdate(BaseModel):
     description: str | None = None
     due_date: datetime | None = None
     assignee_id: UUID | None = None
+    estimate_points: float | None = Field(default=None, ge=0, le=100)
+    sprint_id: UUID | None = None
     label_ids: list[UUID] | None = None
 
 
@@ -39,6 +43,9 @@ class CardPublic(BaseModel):
     position: float
     due_date: datetime | None
     assignee_id: UUID | None
+    estimate_points: float | None = None
+    sprint_id: UUID | None = None
+    completed_at: datetime | None = None
     assignee: UserPublic | None = None
     labels: list[LabelPublic] = []
     created_at: datetime

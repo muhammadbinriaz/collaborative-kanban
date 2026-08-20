@@ -32,6 +32,11 @@ class Card(Base):
     assignee_id: Mapped[Optional[UUID]] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
+    estimate_points: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    sprint_id: Mapped[Optional[UUID]] = mapped_column(
+        PGUUID(as_uuid=True), ForeignKey("sprints.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -39,6 +44,7 @@ class Card(Base):
 
     board_list: Mapped["BoardList"] = relationship("BoardList", back_populates="cards")
     assignee: Mapped[Optional["User"]] = relationship("User", foreign_keys=[assignee_id])
+    sprint: Mapped[Optional["Sprint"]] = relationship("Sprint", back_populates="cards")
     labels: Mapped[list["Label"]] = relationship(
         "Label", secondary=card_labels, back_populates="cards"
     )

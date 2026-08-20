@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { CardComments } from "@/components/kanban/card-comments";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
-import type { BoardDetail, Card } from "@/types";
+import type { BoardDetail, Card, Sprint, WorkspaceDetail } from "@/types";
 
 export function CardModal({
   card,
@@ -28,13 +28,31 @@ export function CardModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [estimate, setEstimate] = useState("");
+  const [assigneeId, setAssigneeId] = useState("");
+  const [sprintId, setSprintId] = useState("");
   const [labelIds, setLabelIds] = useState<string[]>([]);
+
+  const workspace = useQuery({
+    queryKey: ["workspace", board.workspace_id],
+    queryFn: () => api<WorkspaceDetail>(`/api/v1/workspaces/${board.workspace_id}`),
+    enabled: open,
+  });
+
+  const sprints = useQuery({
+    queryKey: ["sprints", board.id],
+    queryFn: () => api<Sprint[]>(`/api/v1/boards/${board.id}/sprints`),
+    enabled: open,
+  });
 
   useEffect(() => {
     if (!card) return;
     setTitle(card.title);
     setDescription(card.description ?? "");
     setDueDate(card.due_date ? card.due_date.slice(0, 10) : "");
+    setEstimate(card.estimate_points != null ? String(card.estimate_points) : "");
+    setAssigneeId(card.assignee_id ?? "");
+    setSprintId(card.sprint_id ?? "");
     setLabelIds(card.labels.map((label) => label.id));
   }, [card]);
 
@@ -46,12 +64,17 @@ export function CardModal({
           title,
           description,
           due_date: dueDate ? new Date(`${dueDate}T12:00:00`).toISOString() : null,
+          estimate_points: estimate === "" ? null : Number(estimate),
+          assignee_id: assigneeId || null,
+          sprint_id: sprintId || null,
           label_ids: labelIds,
         }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["board", board.id] });
       queryClient.invalidateQueries({ queryKey: ["activity", board.id] });
+      queryClient.invalidateQueries({ queryKey: ["analytics", board.id] });
+      queryClient.invalidateQueries({ queryKey: ["sprints", board.id] });
       toast.success("Card updated");
     },
     onError: (error: Error) => toast.error(error.message),
@@ -95,9 +118,58 @@ export function CardModal({
               rows={4}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="card-due">Due date</Label>
-            <Input id="card-due" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="card-due">Due date</Label>
+              <Input id="card-due" type="date" value={dueDate} onChange={(event) => setDueDate(event.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="card-estimate">Estimate (points)</Label>
+              <Input
+                id="card-estimate"
+                type="number"
+                min={0}
+                step={0.5}
+                value={estimate}
+                onChange={(event) => setEstimate(event.target.value)}
+              />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="card-assignee">Assignee</Label>
+              <select
+                id="card-assignee"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                value={assigneeId}
+                onChange={(event) => setAssigneeId(event.target.value)}
+              >
+                <option value="">Unassigned</option>
+                {(workspace.data?.members ?? []).map((member) => (
+                  <option key={member.user_id} value={member.user_id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="card-sprint">Sprint</Label>
+              <select
+                id="card-sprint"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                value={sprintId}
+                onChange={(event) => setSprintId(event.target.value)}
+              >
+                <option value="">None</option>
+                {(sprints.data ?? [])
+                  .filter((sprint) => sprint.status !== "completed")
+                  .map((sprint) => (
+                    <option key={sprint.id} value={sprint.id}>
+                      {sprint.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Labels</Label>
