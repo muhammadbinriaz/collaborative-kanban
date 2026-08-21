@@ -48,6 +48,9 @@ class Card(Base):
     labels: Mapped[list["Label"]] = relationship(
         "Label", secondary=card_labels, back_populates="cards"
     )
+    attachments: Mapped[list["Attachment"]] = relationship(
+        "Attachment", back_populates="card", cascade="all, delete-orphan"
+    )
 
 
 class Label(Base):

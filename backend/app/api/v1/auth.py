@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response
+﻿from fastapi import APIRouter, Query, Response
 
 from app.api.deps import CurrentUser, DbSession, RefreshCookie
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserPublic
@@ -30,3 +30,13 @@ def logout(response: Response, db: DbSession, refresh_token: RefreshCookie) -> N
 @router.get("/me", response_model=UserPublic)
 def me(current_user: CurrentUser) -> UserPublic:
     return UserPublic.model_validate(current_user)
+
+
+@router.post("/verify-email", response_model=UserPublic)
+def verify_email(db: DbSession, token: str = Query(...)) -> UserPublic:
+    return auth_service.verify_email(db, token)
+
+
+@router.post("/resend-verification", status_code=204)
+def resend_verification(db: DbSession, current_user: CurrentUser) -> None:
+    auth_service.resend_verification(db, current_user)

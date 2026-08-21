@@ -15,6 +15,7 @@ from app.models.workspace import Workspace, WorkspaceMember, WorkspaceRole
 from app.schemas.collaboration import InviteAcceptResponse, InviteCreate, InvitePreview, InvitePublic
 from app.schemas.workspace import MemberPublic
 from app.services.activity import create_notification, log_activity
+from app.services.email import send_invite_email
 from app.services.workspace import _member_public, require_workspace
 
 
@@ -26,6 +27,7 @@ def create_invite(db: Session, user: User, workspace_id: UUID, payload: InviteCr
         workspace_id=workspace_id,
         token=secrets.token_urlsafe(24),
         role=payload.role.value,
+        email=payload.email.lower() if payload.email else None,
         created_by_id=user.id,
         expires_at=datetime.now(UTC) + timedelta(hours=payload.expires_in_hours),
     )
@@ -39,7 +41,16 @@ def create_invite(db: Session, user: User, workspace_id: UUID, payload: InviteCr
     )
     db.commit()
     db.refresh(invite)
-    return _invite_public(invite)
+    public = _invite_public(invite)
+    if invite.email and public.invite_url:
+        workspace = db.get(Workspace, workspace_id)
+        send_invite_email(
+            to=invite.email,
+            workspace_name=workspace.name if workspace else "workspace",
+            invite_url=public.invite_url,
+            inviter_name=user.name,
+        )
+    return public
 
 
 def list_invites(db: Session, user: User, workspace_id: UUID) -> list[InvitePublic]:

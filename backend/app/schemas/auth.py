@@ -10,6 +10,7 @@ class UserPublic(BaseModel):
     id: UUID
     email: EmailStr
     name: str
+    email_verified: bool = False
     created_at: datetime
 
 

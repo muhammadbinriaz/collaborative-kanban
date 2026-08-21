@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from uuid import UUID
+import secrets
 
 from fastapi import HTTPException, Response, status
 from jwt import InvalidTokenError
@@ -19,6 +20,7 @@ from app.core.security import (
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserPublic
+from app.services.email import send_verification_email
 
 
 def _set_refresh_cookie(response: Response, raw_token: str) -> None:
@@ -63,14 +65,18 @@ def register_user(db: Session, payload: RegisterRequest, response: Response) -> 
     if existing:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email is already registered")
 
+    verify_token = secrets.token_urlsafe(32)
     user = User(
         email=payload.email.lower(),
         password_hash=hash_password(payload.password),
         name=payload.name.strip(),
+        email_verified=False,
+        email_verify_token=verify_token,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+    send_verification_email(to=user.email, name=user.name, token=verify_token)
     return _issue_tokens(db, user, response)
 
 
@@ -130,3 +136,23 @@ def get_user_from_access_token(db: Session, token: str) -> User:
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
+
+
+def verify_email(db: Session, token: str) -> UserPublic:
+    user = db.scalar(select(User).where(User.email_verify_token == token))
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invalid verification token")
+    user.email_verified = True
+    user.email_verify_token = None
+    db.commit()
+    db.refresh(user)
+    return UserPublic.model_validate(user)
+
+
+def resend_verification(db: Session, user: User) -> None:
+    if user.email_verified:
+        return
+    token = secrets.token_urlsafe(32)
+    user.email_verify_token = token
+    db.commit()
+    send_verification_email(to=user.email, name=user.name, token=token)

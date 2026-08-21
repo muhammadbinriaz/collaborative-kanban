@@ -14,5 +14,7 @@ redis==5.2.1
 celery==5.4.0
 pgvector==0.3.6
 numpy==2.2.2
+boto3==1.36.4
+sentry-sdk[fastapi]==2.20.0
 pytest==8.3.4
 pytest-cov==6.0.0

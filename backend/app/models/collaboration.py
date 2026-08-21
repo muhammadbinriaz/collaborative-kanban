@@ -20,6 +20,7 @@ class WorkspaceInvite(Base):
     )
     token: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False, default="member")
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_by_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )

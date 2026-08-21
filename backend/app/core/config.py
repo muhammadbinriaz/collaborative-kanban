@@ -22,11 +22,25 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     S3_ENDPOINT: str = "http://localhost:9000"
+    S3_PUBLIC_ENDPOINT: str = "http://localhost:9000"
     S3_BUCKET: str = "kanban-storage"
     S3_REGION: str = "us-east-1"
     AWS_ACCESS_KEY_ID: str = "minioadmin"
     AWS_SECRET_ACCESS_KEY: str = "minioadmin"
     S3_USE_SSL: bool = False
+
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
+    GITHUB_WEBHOOK_SECRET: str = ""
+
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 1025
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = False
+    SMTP_FROM: str = "Kanban <noreply@kanban.local>"
+
+    SENTRY_DSN: str = ""
 
     ENVIRONMENT: str = "development"
     DEBUG: bool = True

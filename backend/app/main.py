@@ -9,9 +9,18 @@ from app.websocket.routes import router as ws_router
 
 setup_logging()
 
+if settings.SENTRY_DSN:
+    import sentry_sdk
+
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        traces_sample_rate=0.1 if settings.ENVIRONMENT == "production" else 0.0,
+    )
+
 app = FastAPI(
     title="AI Kanban API",
-    version="0.2.0",
+    version="0.5.0",
     description="Custom FastAPI backend for the AI-powered collaborative Kanban app.",
     docs_url="/docs",
     redoc_url="/redoc",

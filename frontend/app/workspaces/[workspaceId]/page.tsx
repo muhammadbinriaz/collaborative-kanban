@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/app-header";
+import { GithubPanel } from "@/components/github-panel";
 import { InvitePanel } from "@/components/invite-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,6 +106,14 @@ export default function WorkspacePage() {
           </Dialog>
           </div>
         </div>
+        {workspace.data ? (
+          <div className="mb-8 max-w-lg">
+            <GithubPanel
+              workspaceId={workspace.data.id}
+              canManage={workspace.data.role === "owner" || workspace.data.role === "admin"}
+            />
+          </div>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {boards.data?.map((board) => (
             <Link key={board.id} href={`/boards/${board.id}`}>

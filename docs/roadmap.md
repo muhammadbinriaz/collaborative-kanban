@@ -38,13 +38,13 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] Celery jobs for slow AI work
 - [x] AI UI panels on the board (`frontend/components/ai`)
 
-## Phase 5 — Integrations and production (next)
+## Phase 5 — Integrations and production
 
-- [ ] Card attachments (MinIO in dev / S3 in prod)
-- [ ] GitHub OAuth, repo connect, PR/commit webhooks
-- [ ] Email (verification, invites, notifications)
-- [ ] Sentry, GitHub Actions CI, prod compose / Nginx
-- [ ] Load tests for WebSockets
+- [x] Card attachments (MinIO in dev / S3 in prod)
+- [x] GitHub OAuth, repo connect, PR/commit webhooks
+- [x] Email (verification, invites, notifications via SMTP/MailHog)
+- [x] Sentry, GitHub Actions CI, prod compose / Nginx
+- [x] Load tests for WebSockets (`scripts/ws_load_test.py`)
 
 ## Later (v2)
 

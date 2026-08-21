@@ -67,8 +67,12 @@ services:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kanban}:${POSTGRES_PASSWORD:-kanban}@postgres:5432/${POSTGRES_DB:-kanban}
       REDIS_URL: redis://redis:6379/0
       S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: http://localhost:9000
       FRONTEND_URL: http://localhost:3000
       API_URL: http://localhost:8000
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+      SMTP_FROM: Kanban <noreply@kanban.local>
     ports:
       - "8000:8000"
     volumes:
@@ -89,6 +93,10 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-kanban}:${POSTGRES_PASSWORD:-kanban}@postgres:5432/${POSTGRES_DB:-kanban}
       REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: http://localhost:9000
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
     volumes:
       - ../backend:/app
     depends_on:
@@ -97,6 +105,12 @@ services:
       redis:
         condition: service_healthy
     command: celery -A app.tasks.celery_app.celery_app worker --loglevel=info
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
   frontend:
     build:

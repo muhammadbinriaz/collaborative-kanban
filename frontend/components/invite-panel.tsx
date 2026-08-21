@@ -7,6 +7,7 @@ import { Copy, Link2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import type { Invite, WorkspaceDetail, WorkspaceRole } from "@/types";
 
@@ -14,6 +15,7 @@ export function InvitePanel({ workspace }: { workspace: WorkspaceDetail }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<WorkspaceRole>("member");
+  const [email, setEmail] = useState("");
   const canInvite = workspace.role === "owner" || workspace.role === "admin";
 
   const invites = useQuery({
@@ -26,13 +28,18 @@ export function InvitePanel({ workspace }: { workspace: WorkspaceDetail }) {
     mutationFn: () =>
       api<Invite>(`/api/v1/workspaces/${workspace.id}/invites`, {
         method: "POST",
-        body: JSON.stringify({ role, expires_in_hours: 168 }),
+        body: JSON.stringify({
+          role,
+          expires_in_hours: 168,
+          email: email.trim() || null,
+        }),
       }),
     onSuccess: async (invite) => {
       queryClient.invalidateQueries({ queryKey: ["invites", workspace.id] });
       const url = invite.invite_url ?? `${window.location.origin}/invite/${invite.token}`;
       await navigator.clipboard.writeText(url);
-      toast.success("Invite link copied");
+      setEmail("");
+      toast.success(invite.email ? "Invite emailed and link copied" : "Invite link copied");
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -52,6 +59,18 @@ export function InvitePanel({ workspace }: { workspace: WorkspaceDetail }) {
           <DialogTitle>Invite teammates</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="invite-email">
+              Email (optional)
+            </label>
+            <Input
+              id="invite-email"
+              type="email"
+              placeholder="teammate@example.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
           <div className="space-y-2">
             <label className="text-sm font-medium" htmlFor="invite-role">
               Role

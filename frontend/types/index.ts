@@ -2,6 +2,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  email_verified?: boolean;
   created_at: string;
 };
 
@@ -89,9 +90,21 @@ export type Invite = {
   workspace_id: string;
   token: string;
   role: WorkspaceRole;
+  email?: string | null;
   expires_at: string;
   created_at: string;
   invite_url?: string | null;
+};
+
+export type Attachment = {
+  id: string;
+  card_id: string;
+  uploaded_by_id: string | null;
+  filename: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
+  download_url?: string | null;
 };
 
 export type InvitePreview = {

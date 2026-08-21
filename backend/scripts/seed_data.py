@@ -34,7 +34,12 @@ def seed() -> None:
             print("Demo data already exists. Login with demo@kanban.dev / Demo12345!")
             return
 
-        user = User(email=DEMO_EMAIL, password_hash=hash_password(DEMO_PASSWORD), name="Demo User")
+        user = User(
+            email=DEMO_EMAIL,
+            password_hash=hash_password(DEMO_PASSWORD),
+            name="Demo User",
+            email_verified=True,
+        )
         db.add(user)
         db.flush()
 

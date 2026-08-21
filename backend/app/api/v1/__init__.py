@@ -1,3 +1,14 @@
-from app.api.v1 import ai, auth, boards, cards, collaboration, lists, sprints, workspaces
+﻿from app.api.v1 import ai, attachments, auth, boards, cards, collaboration, github, lists, sprints, workspaces
 
-__all__ = ["ai", "auth", "boards", "cards", "collaboration", "lists", "sprints", "workspaces"]
+__all__ = [
+    "ai",
+    "attachments",
+    "auth",
+    "boards",
+    "cards",
+    "collaboration",
+    "github",
+    "lists",
+    "sprints",
+    "workspaces",
+]
