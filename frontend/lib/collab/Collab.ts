@@ -112,7 +112,7 @@ export class Collab {
     socket.on("disconnect", () => this.listeners.onStatus?.(false));
     socket.on("connect_error", () => this.listeners.onStatus?.(false));
 
-    this.initTimer = window.setTimeout(() => {
+    this.initTimer = setTimeout(() => {
       this.initializeRoom();
     }, INITIAL_SCENE_UPDATE_TIMEOUT);
   }
@@ -217,7 +217,7 @@ export class Collab {
 
   private queueBroadcastAllElements() {
     if (this.fullSyncTimer) return;
-    this.fullSyncTimer = window.setTimeout(() => {
+    this.fullSyncTimer = setTimeout(() => {
       this.fullSyncTimer = null;
       if (!this.api) return;
       const all = this.api.getSceneElementsIncludingDeleted?.() ?? this.api.getSceneElements();
