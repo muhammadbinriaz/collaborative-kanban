@@ -8,6 +8,7 @@ from app.models.list import BoardList
 from app.models.refresh_token import RefreshToken
 from app.models.sprint import Sprint
 from app.models.user import User
+from app.models.whiteboard import Whiteboard
 from app.models.workspace import ROLE_RANK, Workspace, WorkspaceMember, WorkspaceRole
 
 __all__ = [
@@ -27,6 +28,7 @@ __all__ = [
     "ROLE_RANK",
     "Sprint",
     "User",
+    "Whiteboard",
     "Workspace",
     "WorkspaceInvite",
     "WorkspaceMember",

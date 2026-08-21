@@ -16,5 +16,7 @@ pgvector==0.3.6
 numpy==2.2.2
 boto3==1.36.4
 sentry-sdk[fastapi]==2.20.0
+python-socketio==5.12.1
+python-engineio==4.11.2
 pytest==8.3.4
 pytest-cov==6.0.0

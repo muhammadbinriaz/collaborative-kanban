@@ -59,6 +59,7 @@ export async function api<T>(path: string, options: RequestInit = {}, retry = tr
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const response = await fetch(`${API_URL}${path}`, {
+    cache: "no-store",
     ...options,
     headers,
     credentials: "include",

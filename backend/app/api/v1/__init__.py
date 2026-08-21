@@ -1,4 +1,16 @@
-﻿from app.api.v1 import ai, attachments, auth, boards, cards, collaboration, github, lists, sprints, workspaces
+﻿from app.api.v1 import (
+    ai,
+    attachments,
+    auth,
+    boards,
+    cards,
+    collaboration,
+    github,
+    lists,
+    sprints,
+    whiteboards,
+    workspaces,
+)
 
 __all__ = [
     "ai",
@@ -10,5 +22,6 @@ __all__ = [
     "github",
     "lists",
     "sprints",
+    "whiteboards",
     "workspaces",
 ]

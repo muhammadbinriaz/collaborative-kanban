@@ -46,6 +46,13 @@ The full product vision stays here. Implementation is phased. Do not treat unche
 - [x] Sentry, GitHub Actions CI, prod compose / Nginx
 - [x] Load tests for WebSockets (`scripts/ws_load_test.py`)
 
+## Phase 6 — Whiteboards (Excalidraw)
+
+- [x] Workspace whiteboards CRUD
+- [x] Embed open-source [Excalidraw](https://github.com/excalidraw/excalidraw) editor
+- [x] Autosave scene JSON to Postgres
+- [x] Realtime multiplayer canvas sync (WebSocket rooms + cursors)
+
 ## Later (v2)
 
 - [ ] Slack integration

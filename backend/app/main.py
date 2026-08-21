@@ -1,8 +1,11 @@
 from app import models  # noqa: F401 — register SQLAlchemy mappers
+
+import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
+from app.collab.excalidraw_room import sio
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.websocket.routes import router as ws_router
@@ -20,7 +23,7 @@ if settings.SENTRY_DSN:
 
 app = FastAPI(
     title="AI Kanban API",
-    version="0.5.0",
+    version="0.6.0",
     description="Custom FastAPI backend for the AI-powered collaborative Kanban app.",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -41,3 +44,7 @@ app.include_router(ws_router)
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "environment": settings.ENVIRONMENT}
+
+
+# Excalidraw-room compatible Socket.IO ASGI wrapper (websocket + HTTP polling).
+socket_app = socketio.ASGIApp(sio, other_asgi_app=app)

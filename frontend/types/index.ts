@@ -107,6 +107,28 @@ export type Attachment = {
   download_url?: string | null;
 };
 
+export type Whiteboard = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  scene: {
+    elements?: unknown[];
+    appState?: Record<string, unknown>;
+    files?: Record<string, unknown>;
+  } | null;
+  created_by_id?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type WhiteboardSummary = {
+  id: string;
+  workspace_id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type InvitePreview = {
   workspace_id: string;
   workspace_name: string;
@@ -153,6 +175,7 @@ export type PresenceUser = {
   id: string;
   name: string;
   email: string;
+  color?: string;
 };
 
 export type Sprint = {
