@@ -1,20 +1,23 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { AppHeader } from "@/components/app-header";
+import { InvitePageSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { useAppRouter } from "@/hooks/use-app-router";
 import { api } from "@/lib/api";
 import type { InvitePreview } from "@/types";
 
 export default function InvitePage() {
   const { user, ready } = useAuth({ requireAuth: true });
   const params = useParams<{ token: string }>();
-  const router = useRouter();
+  const router = useAppRouter();
   const token = params.token;
 
   const preview = useQuery({
@@ -34,7 +37,7 @@ export default function InvitePage() {
   });
 
   if (!ready || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+    return <InvitePageSkeleton />;
   }
 
   return (
@@ -49,8 +52,9 @@ export default function InvitePage() {
                 ? "This invite is invalid or expired."
                 : preview.data
                   ? `You are invited to ${preview.data.workspace_name} as ${preview.data.role}.`
-                  : "Loading invite…"}
+                  : null}
             </CardDescription>
+            {preview.isLoading ? <Skeleton className="mt-2 h-4 w-3/4" /> : null}
           </CardHeader>
           <CardContent>
             <Button

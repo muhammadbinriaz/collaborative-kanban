@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import { HomeRedirectSkeleton } from "@/components/skeletons";
 import { getAccessToken } from "@/lib/api";
 
 export default function HomePage() {
@@ -12,7 +13,5 @@ export default function HomePage() {
     router.replace(getAccessToken() ? "/workspaces" : "/login");
   }, [router]);
 
-  return (
-    <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>
-  );
+  return <HomeRedirectSkeleton />;
 }

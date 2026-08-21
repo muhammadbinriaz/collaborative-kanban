@@ -10,6 +10,7 @@ import { AnalyticsPanel } from "@/components/analytics/analytics-panel";
 import { AppHeader } from "@/components/app-header";
 import { BoardView } from "@/components/kanban/board-view";
 import { SprintPanel } from "@/components/kanban/sprint-panel";
+import { BoardPageSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { api } from "@/lib/api";
@@ -31,7 +32,7 @@ export default function BoardPage() {
   });
 
   if (!ready || !user || board.isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading board…</div>;
+    return <BoardPageSkeleton />;
   }
 
   if (!board.data) {

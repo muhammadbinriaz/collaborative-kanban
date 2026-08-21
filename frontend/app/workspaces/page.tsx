@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
 import { AppHeader } from "@/components/app-header";
+import { WorkspacesPageSkeleton } from "@/components/skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -40,7 +42,7 @@ export default function WorkspacesPage() {
   });
 
   if (!ready || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+    return <WorkspacesPageSkeleton />;
   }
 
   return (
@@ -81,24 +83,38 @@ export default function WorkspacesPage() {
             </DialogContent>
           </Dialog>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {workspaces.data?.map((workspace) => (
-            <Link key={workspace.id} href={`/workspaces/${workspace.id}`}>
-              <Card className="h-full transition-shadow hover:shadow-md">
-                <CardHeader>
-                  <CardTitle>{workspace.name}</CardTitle>
-                  <CardDescription>
-                    {workspace.role ?? "member"} · {workspace.slug}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Open boards</CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-        {workspaces.data?.length === 0 ? (
-          <p className="mt-10 text-center text-muted-foreground">Create a workspace to start a board.</p>
-        ) : null}
+        {workspaces.isLoading ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="space-y-3 rounded-xl border bg-card p-6">
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="mt-4 h-4 w-24" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {workspaces.data?.map((workspace) => (
+                <Link key={workspace.id} href={`/workspaces/${workspace.id}`}>
+                  <Card className="h-full transition-shadow hover:shadow-md">
+                    <CardHeader>
+                      <CardTitle>{workspace.name}</CardTitle>
+                      <CardDescription>
+                        {workspace.role ?? "member"} · {workspace.slug}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">Open boards</CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+            {workspaces.data?.length === 0 ? (
+              <p className="mt-10 text-center text-muted-foreground">Create a workspace to start a board.</p>
+            ) : null}
+          </>
+        )}
       </main>
     </div>
   );

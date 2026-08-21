@@ -2,29 +2,29 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { AppHeader } from "@/components/app-header";
 import { PresenceAvatars } from "@/components/presence-avatars";
+import { WhiteboardCanvasSkeleton, WhiteboardPageSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import { useAppRouter } from "@/hooks/use-app-router";
 import { api } from "@/lib/api";
 import type { PresenceUser, Whiteboard } from "@/types";
 
 const ExcalidrawCanvas = dynamic(() => import("@/components/whiteboard/excalidraw-canvas"), {
   ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Loading Excalidraw…</div>
-  ),
+  loading: () => <WhiteboardCanvasSkeleton />,
 });
 
 export default function WhiteboardPage() {
   const { user, ready } = useAuth({ requireAuth: true });
   const params = useParams<{ whiteboardId: string }>();
   const whiteboardId = params.whiteboardId;
-  const router = useRouter();
+  const router = useAppRouter();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
   const [presence, setPresence] = useState<PresenceUser[]>([]);
@@ -71,7 +71,7 @@ export default function WhiteboardPage() {
   );
 
   if (!ready || !user || board.isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+    return <WhiteboardPageSkeleton />;
   }
 
   if (!board.data) {

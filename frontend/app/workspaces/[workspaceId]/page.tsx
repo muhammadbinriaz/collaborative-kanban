@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PencilRuler, Plus } from "lucide-react";
@@ -10,13 +10,16 @@ import { PencilRuler, Plus } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GithubPanel } from "@/components/github-panel";
 import { InvitePanel } from "@/components/invite-panel";
+import { WorkspaceDetailSkeleton } from "@/components/skeletons";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
+import { useAppRouter } from "@/hooks/use-app-router";
 import { api } from "@/lib/api";
 import type { Board, Whiteboard, WhiteboardSummary, WorkspaceDetail } from "@/types";
 
@@ -25,7 +28,7 @@ export default function WorkspacePage() {
   const params = useParams<{ workspaceId: string }>();
   const workspaceId = params.workspaceId;
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const router = useAppRouter();
   const [open, setOpen] = useState(false);
   const [wbOpen, setWbOpen] = useState(false);
   const [name, setName] = useState("");
@@ -83,7 +86,7 @@ export default function WorkspacePage() {
   });
 
   if (!ready || !user || workspace.isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
+    return <WorkspaceDetailSkeleton />;
   }
 
   return (
@@ -184,6 +187,29 @@ export default function WorkspacePage() {
               canManage={workspace.data.role === "owner" || workspace.data.role === "admin"}
             />
           </div>
+        ) : null}
+
+        {(whiteboards.isLoading || boards.isLoading) && (whiteboards.data ?? []).length === 0 && (boards.data ?? []).length === 0 ? (
+          <>
+            <Skeleton className="mb-3 h-3 w-28" />
+            <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-3 rounded-xl border bg-card p-6">
+                  <Skeleton className="h-5 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              ))}
+            </div>
+            <Skeleton className="mb-3 h-3 w-32" />
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-3 rounded-xl border bg-card p-6">
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              ))}
+            </div>
+          </>
         ) : null}
 
         {(whiteboards.data ?? []).length > 0 ? (

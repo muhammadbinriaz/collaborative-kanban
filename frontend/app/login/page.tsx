@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
+import { useAppRouter } from "@/hooks/use-app-router";
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 
@@ -26,7 +26,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
   useAuth({ guestOnly: true });
-  const router = useRouter();
+  const router = useAppRouter();
   const setSession = useAuthStore((state) => state.setSession);
   const form = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: "", password: "" } });
 
