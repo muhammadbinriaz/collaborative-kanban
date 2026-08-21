@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LayoutGrid, LogOut } from "lucide-react";
 
 import { NotificationBell } from "@/components/notifications-bell";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { authApi } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
@@ -48,6 +49,7 @@ export function AppHeader({ title, backHref, backLabel }: { title?: string; back
           ) : null}
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           {user ? <NotificationBell /> : null}
           {user ? <span className="hidden text-sm text-muted-foreground sm:inline">{user.name}</span> : null}
           <Button variant="ghost" size="sm" onClick={logout}>
